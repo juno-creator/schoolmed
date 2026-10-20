@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f6b5a">
+<title>보건실 약품장</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#eef3f1; --card:#ffffff; --fg:#17312b; --muted:#5d7069; --line:#d3dfdb;
+  --accent:#0f6b5a; --accent-fg:#ffffff; --accent-soft:#dcefe9;
+  --bad:#c0362c; --bad-soft:#fbe4e1; --warn:#b26a00; --warn-soft:#fdf0d9; --mid:#5b6b8a; --mid-soft:#e6eaf3; --ok:#2f7d4f; --ok-soft:#e1f2e7;
+  --f-body:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0f1a17; --card:#16241f; --fg:#e3eeea; --muted:#93a9a1; --line:#2a3c36;
+  --accent:#4fc2a6; --accent-fg:#06221b; --accent-soft:#1c3a32;
+  --bad:#ff7b6e; --bad-soft:#3d1d1a; --warn:#f0b04a; --warn-soft:#3a2b12; --mid:#9fb1d6; --mid-soft:#232c3e; --ok:#6fcf93; --ok-soft:#173020;
+  color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding-block:16px 110px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-size:22px;margin:0;font-weight:700;letter-spacing:-.01em}
+.today{color:var(--muted);font-size:13px;font-family:var(--f-mono)}
+button,.btn{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--fg);padding:9px 14px;font-weight:500;display:inline-flex;align-items:center;gap:6px;justify-content:center;text-decoration:none}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+button.ghost{background:transparent;border-color:transparent;padding:8px 10px}
+button.danger{color:var(--bad);border-color:var(--bad)}
+button.danger.armed{background:var(--bad);color:var(--card)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sum{border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:1px solid transparent;text-align:left}
+.sum b{font-family:var(--f-mono);font-size:24px;font-variant-numeric:tabular-nums;line-height:1.1}
+.sum span{font-size:12px}
+.sum.bad{background:var(--bad-soft);color:var(--bad)} .sum.warn{background:var(--warn-soft);color:var(--warn)} .sum.mid{background:var(--mid-soft);color:var(--mid)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{border:none;background:none;border-radius:0;padding:10px 12px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent);font-weight:700}
+.list{display:flex;flex-direction:column;gap:8px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 12px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:6px;text-align:left;border-top-width:5px;min-width:0}
+.tile.bad{border-top-color:var(--bad)} .tile.warn{border-top-color:var(--warn)} .tile.mid{border-top-color:var(--mid)} .tile.ok{border-top-color:var(--ok)}
+.tile .code{font-family:var(--f-mono);font-size:30px;font-weight:600;line-height:1;color:var(--accent)}
+.tile .tname{font-weight:700;font-size:14px;overflow-wrap:anywhere}
+.tile small{color:var(--muted);font-size:12px}
+.chip{font-size:12px;font-weight:700;border-radius:999px;padding:3px 9px;white-space:nowrap;font-family:var(--f-mono)}
+.chip.bad{background:var(--bad-soft);color:var(--bad)} .chip.warn{background:var(--warn-soft);color:var(--warn)} .chip.mid{background:var(--mid-soft);color:var(--mid)} .chip.ok{background:var(--ok-soft);color:var(--ok)}
+.med{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:2px 12px;text-align:left;width:100%;border-left-width:5px;justify-content:stretch}
+.med.bad{border-left-color:var(--bad)} .med.warn{border-left-color:var(--warn)} .med.mid{border-left-color:var(--mid)} .med.ok{border-left-color:var(--ok)}
+.med .name{font-weight:700;font-size:16px;min-width:0;overflow-wrap:anywhere}
+.med .sub{color:var(--muted);font-size:13px;min-width:0}
+.med .date{font-family:var(--f-mono);font-size:13px;text-align:right;color:var(--muted)}
+.med .chip{justify-self:end}
+.sheet-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sheet-head h2{margin:0;font-size:20px;flex:1;min-width:0;display:flex;align-items:center;gap:8px}
+.sheet-head .tag{font-family:var(--f-mono);font-size:15px;background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:2px 8px}
+.sheet-head .place{color:var(--muted);font-size:13px;width:100%}
+.empty{border:1px dashed var(--line);border-radius:12px;padding:24px 16px;text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:10px;align-items:center}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.note{font-size:13px;color:var(--muted)}
+.labels{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.label{background:#fff;color:#111;border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.label canvas{width:110px;height:110px}
+.label b{font-size:14px;text-align:center}
+.label button{background:#fff;color:#111;border-color:#ccc;padding:6px 10px;font-size:13px}
+dialog{border:none;border-radius:16px;padding:0;background:var(--card);color:var(--fg);width:min(460px,calc(100vw - 32px));max-height:calc(100dvh - 32px)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog form{padding:18px;display:flex;flex-direction:column;gap:12px}
+dialog h3{margin:0;font-size:18px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+input,select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.actions{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap}
+.actions .right{display:flex;gap:8px;margin-left:auto}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:30;max-width:calc(100vw - 32px)}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;gap:10px;justify-content:center;padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:linear-gradient(transparent,var(--bg) 35%)}
+.bar button{padding:13px 20px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.18);font-size:16px}
+.scan{position:fixed;inset:0;z-index:20;background:#000;display:flex;flex-direction:column}
+.scan #reader{flex:1;width:100%}
+.scan #reader video{object-fit:cover}
+.scan .scan-bar{display:flex;justify-content:space-between;align-items:center;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;color:#fff}
+.scan .scan-bar button{background:#ffffff22;color:#fff;border-color:#ffffff44}
+.status{font-size:13px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header class="top">
+    <div>
+      <h1>보건실 약품장</h1>
+      <div class="today" id="today"></div>
+    </div>
+    <button class="ghost" id="openSettings">설정</button>
+  </header>
+
+  <section id="setup" class="card" hidden>
+    <h2 style="margin:0;font-size:18px">구글 시트 연결</h2>
+    <p class="note" style="margin:0">Apps Script를 배포하고 받은 <b>웹 앱 URL</b>과 Code.gs에 적은 <b>비밀번호</b>를 넣어 주세요. 이 기기에만 저장돼요(PC·휴대폰 각각 한 번씩).</p>
+    <label class="f">웹 앱 URL<input id="sUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></label>
+    <label class="f">비밀번호<input id="sKey" type="password" autocomplete="off"></label>
+    <div class="row"><button class="primary" id="sSave">연결하기</button><button id="sCancel">닫기</button></div>
+    <div class="status" id="sMsg"></div>
+  </section>
+
+  <div id="main">
+    <div class="summary">
+      <button class="sum bad" data-goto="soon"><b id="nBad">–</b><span>유효기간 지남</span></button>
+      <button class="sum warn" data-goto="soon"><b id="nWarn">–</b><span>30일 이내</span></button>
+      <button class="sum mid" data-goto="soon"><b id="nMid">–</b><span>90일 이내</span></button>
+    </div>
+
+    <section id="home" style="margin-top:16px">
+      <nav class="tabs" role="tablist">
+        <button role="tab" data-tab="cabs" aria-selected="true">수납장</button>
+        <button role="tab" data-tab="soon" aria-selected="false">기한 임박</button>
+        <button role="tab" data-tab="qr" aria-selected="false">QR 라벨</button>
+      </nav>
+      <div id="pane" style="padding-top:14px"></div>
+    </section>
+
+    <section id="cabinet" style="margin-top:16px" hidden></section>
+    <div class="status" id="status"></div>
+  </div>
+</div>
+
+<div class="bar" id="bar">
+  <button class="primary" id="scanBtn">QR 스캔</button>
+  <button id="addMed">＋ 약 추가</button>
+</div>
+
+<div class="scan" id="scanView" hidden>
+  <div class="scan-bar"><span>수납장 QR을 비춰 주세요</span><button id="scanClose">닫기</button></div>
+  <div id="reader"></div>
+</div>
+
+<dialog id="medDlg"><form method="dialog" id="medForm">
+  <h3 id="medTitle">약 추가</h3>
+  <label class="f">약 이름<input id="mName" required placeholder="예: 타이레놀 8시간 ER"></label>
+  <div class="two">
+    <label class="f">유효기간<input id="mExp" type="date" required></label>
+    <label class="f">수납장<select id="mCab"></select></label>
+  </div>
+  <div class="two">
+    <label class="f">수량<input id="mQty" inputmode="numeric" placeholder="예: 2"></label>
+    <label class="f">단위<input id="mUnit" placeholder="통 / 정 / 개"></label>
+  </div>
+  <label class="f">메모<input id="mNote" placeholder="제조번호, 개봉일 등"></label>
+  <div class="actions">
+    <button type="button" class="danger" id="mDel" hidden>삭제</button>
+    <div class="right"><button type="button" id="mCancel">취소</button><button class="primary">저장</button></div>
+  </div>
+</form></dialog>
+
+<dialog id="cabDlg"><form method="dialog" id="cabForm">
+  <h3 id="cabTitle">수납장 추가</h3>
+  <div class="two">
+    <label class="f">표시 번호<input id="cCode" required placeholder="예: A-1" maxlength="8"></label>
+    <label class="f">이름<input id="cName" required placeholder="예: 해열·진통제"></label>
+  </div>
+  <label class="f">위치<input id="cPlace" placeholder="예: 창가 쪽 흰 수납장 2번째 칸"></label>
+  <div class="actions">
+    <button type="button" class="danger" id="cDel" hidden>삭제</button>
+    <div class="right"><button type="button" id="cCancel">취소</button><button class="primary">저장</button></div>
+  </div>
+</form></dialog>
+
+<script>
+const $ = s => document.querySelector(s);
+const LS = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch{ return d; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} }
+};
+const state = { cabs: [], meds: [], tab: "cabs", openCab: null, editMed: null, editCab: null, loaded: false };
+const cfg = LS.get("medcab.cfg", { url: "", key: "" });
+const cached = LS.get("medcab.data", null);
+if (cached) { state.cabs = cached.cabinets || []; state.meds = cached.meds || []; state.loaded = true; }
+const APP_URL = location.origin + location.pathname;
+
+const pad = n => String(n).padStart(2,"0");
+const now = new Date();
+const todayUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+$("#today").textContent = `오늘 ${now.getFullYear()}.${pad(now.getMonth()+1)}.${pad(now.getDate())}`;
+
+function daysLeft(exp){ const [y,m,d] = String(exp||"").split("-").map(Number); if(!y||!m||!d) return null; return Math.round((Date.UTC(y,m-1,d)-todayUTC)/864e5); }
+function level(dl){ if(dl==null) return "mid"; if(dl<0) return "bad"; if(dl<=30) return "warn"; if(dl<=90) return "mid"; return "ok"; }
+function chipText(dl){ if(dl==null) return "기한 없음"; if(dl<0) return `${-dl}일 지남`; if(dl===0) return "D-DAY"; return `D-${dl}`; }
+function fmtDate(exp){ return exp ? String(exp).replaceAll("-",".") : "—"; }
+function esc(s){ return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function toast(msg,ms=2400){ document.querySelectorAll(".toast").forEach(x=>x.remove()); const t=document.createElement("div"); t.className="toast"; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),ms); }
+const uid = () => Date.now().toString(36).slice(-4) + Math.random().toString(36).slice(2,6);
+const sortCabs = a => [...a].sort((x,y)=>String(x.code).localeCompare(String(y.code),"ko",{numeric:true}));
+const sortMeds = a => [...a].sort((x,y)=>(x.expiry||"9999").localeCompare(y.expiry||"9999") || String(x.name).localeCompare(String(y.name),"ko"));
+const cabById = id => state.cabs.find(c=>c.id===id);
+
+// ---------- Google Sheet API ----------
+async function api(action, payload={}){
+  if(!cfg.url) throw new Error("no_cfg");
+  let res;
+  if(action==="list"){
+    res = await fetch(`${cfg.url}?action=list&key=${encodeURIComponent(cfg.key)}`);
+  } else {
+    res = await fetch(cfg.url, { method:"POST", body: JSON.stringify({ key: cfg.key, action, ...payload }) });
+  }
+  const j = await res.json();
+  if(!j.ok) throw new Error(j.error||"error");
+  return j;
+}
+async function reload(quiet){
+  if(!cfg.url){ showSetup(true); return; }
+  if(!quiet) $("#status").textContent = "구글 시트에서 불러오는 중…";
+  try{
+    const j = await api("list");
+    state.cabs = j.cabinets; state.meds = j.meds; state.loaded = true;
+    LS.set("medcab.data", { cabinets: j.cabinets, meds: j.meds });
+    $("#status").textContent = "";
+    render();
+  }catch(e){
+    $("#status").textContent = e.message==="bad_key" ? "비밀번호가 맞지 않아요. 설정에서 다시 입력해 주세요." : "구글 시트에 연결하지 못했어요. 인터넷 연결이나 설정의 URL을 확인해 주세요." + (state.loaded ? " (마지막으로 불러온 내용을 보여주는 중)" : "");
+  }
+}
+async function write(action, payload, okMsg){
+  try{ await api(action, payload); toast(okMsg||"저장했어요"); await reload(true); return true; }
+  catch(e){ toast(e.message==="bad_key"?"비밀번호가 맞지 않아요":"저장하지 못했어요. 잠시 후 다시 시도해 주세요."); return false; }
+}
+
+// ---------- Setup ----------
+function showSetup(on){
+  $("#setup").hidden = !on; $("#main").hidden = on; $("#bar").hidden = on;
+  if(on){ $("#sUrl").value = cfg.url; $("#sKey").value = cfg.key; $("#sCancel").hidden = !cfg.url; $("#sMsg").textContent=""; }
+}
+$("#openSettings").onclick = () => showSetup(true);
+$("#sCancel").onclick = () => showSetup(false);
+$("#sSave").onclick = async () => {
+  const url = $("#sUrl").value.trim(), key = $("#sKey").value;
+  if(!/^https:\/\/script\.google\.com\/.+\/exec/.test(url)){ $("#sMsg").textContent = "URL은 https://script.google.com/… 으로 시작하고 /exec 로 끝나야 해요."; return; }
+  cfg.url = url; cfg.key = key;
+  $("#sMsg").textContent = "연결 확인 중…";
+  try{ await api("list"); LS.set("medcab.cfg", cfg); showSetup(false); reload(); toast("연결했어요"); }
+  catch(e){ $("#sMsg").textContent = e.message==="bad_key" ? "비밀번호가 Code.gs의 PASSCODE와 달라요." : "연결하지 못했어요. 배포할 때 액세스 권한을 ‘모든 사용자’로 했는지 확인해 주세요."; }
+};
+
+// ---------- Render ----------
+function medRow(m, showCab){
+  const dl = daysLeft(m.expiry), lv = level(dl), cab = cabById(m.cabinetId);
+  const qty = m.qty ? `${esc(m.qty)}${esc(m.unit||"")}` : "";
+  const sub = [showCab && cab ? `${esc(cab.code)} ${esc(cab.name)}` : "", qty, esc(m.note||"")].filter(Boolean).join(" · ");
+  return `<button class="med ${lv}" data-med="${esc(m.id)}">
+    <span class="name">${esc(m.name)}</span><span class="chip ${lv}">${chipText(dl)}</span>
+    <span class="sub">${sub||"&nbsp;"}</span><span class="date">${fmtDate(m.expiry)}</span></button>`;
+}
+
+function render(){
+  let b=0,w=0,mi=0; for(const m of state.meds){ const d=daysLeft(m.expiry); if(d==null) continue; const l=level(d); if(l==="bad")b++; else if(l==="warn")w++; else if(l==="mid")mi++; }
+  $("#nBad").textContent=b; $("#nWarn").textContent=w; $("#nMid").textContent=mi;
+
+  if(state.openCab){ $("#home").hidden=true; $("#cabinet").hidden=false; renderCabinet(); return; }
+  $("#home").hidden=false; $("#cabinet").hidden=true;
+  document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected", x.dataset.tab===state.tab));
+  const pane=$("#pane");
+
+  if(state.tab==="cabs"){
+    const cabs=sortCabs(state.cabs);
+    if(!cabs.length){ pane.innerHTML = `<div class="empty"><strong>${state.loaded?"아직 등록된 수납장이 없어요":"불러오는 중…"}</strong><span>수납장을 만들고 QR 라벨을 붙이면, 휴대폰으로 찍어 그 칸의 약과 유효기간을 바로 볼 수 있어요.</span><button class="primary" id="addCab">＋ 첫 수납장 만들기</button></div>`; return; }
+    pane.innerHTML = `<div class="tiles">${cabs.map(c=>{
+      const ms=state.meds.filter(m=>m.cabinetId===c.id);
+      const ds=ms.map(m=>daysLeft(m.expiry)).filter(d=>d!=null);
+      const worst=ds.length?Math.min(...ds):null;
+      const lv = ms.length ? level(worst) : "mid";
+      const ct = !ms.length ? "비어 있음" : (lv==="ok" ? "이상 없음" : chipText(worst));
+      return `<button class="tile ${lv}" data-cab="${esc(c.id)}"><span class="code">${esc(c.code)}</span><span class="tname">${esc(c.name)}</span><small>약 ${ms.length}종</small><span class="chip ${lv}">${ct}</span></button>`;}).join("")}</div>
+      <div class="row" style="margin-top:12px"><button id="addCab">＋ 수납장 추가</button></div>`;
+  } else if(state.tab==="soon"){
+    const list=sortMeds(state.meds.filter(m=>{const d=daysLeft(m.expiry); return d!=null && d<=90;}));
+    pane.innerHTML = list.length ? `<div class="list">${list.map(m=>medRow(m,true)).join("")}</div><p class="note">90일 이내이거나 이미 지난 약만 보여요. 폐기·교체 후엔 눌러서 기한을 고치거나 삭제하세요.</p>`
+      : `<div class="empty"><strong>90일 안에 끝나는 약이 없어요</strong></div>`;
+  } else renderQR(pane);
+}
+
+function renderCabinet(){
+  const c=cabById(state.openCab), el=$("#cabinet");
+  if(!c){ el.innerHTML = `<div class="sheet-head"><button class="ghost" id="back">← 전체</button></div><div class="empty">${state.loaded?"이 QR의 수납장을 찾을 수 없어요. 삭제되었을 수 있어요.":"불러오는 중…"}</div>`; return; }
+  const ms=sortMeds(state.meds.filter(m=>m.cabinetId===c.id));
+  el.innerHTML = `<div class="sheet-head"><button class="ghost" id="back">← 전체</button><h2><span class="tag">${esc(c.code)}</span>${esc(c.name)}</h2><button class="ghost" id="editCab">수정</button>${c.place?`<div class="place">${esc(c.place)}</div>`:""}</div>
+  <div style="margin-top:14px">${ms.length?`<div class="list">${ms.map(m=>medRow(m,false)).join("")}</div>`:`<div class="empty"><strong>이 칸에 등록된 약이 없어요</strong><span>아래 ＋ 약 추가로 약 이름과 유효기간을 넣어 주세요.</span></div>`}</div>`;
+}
+
+// ---------- QR labels ----------
+const SIZES={"50x30":[50,30],"40x30":[40,30],"50x50":[50,50],"40x40":[40,40],"30x20":[30,20]};
+let lblSize = LS.get("medcab.lbl","50x30"); if(!SIZES[lblSize]) lblSize="50x30";
+const cabLink = c => `${APP_URL}#cab-${c.id}`;
+function qrCanvas(text,size){ const h=document.createElement("div"); new QRCode(h,{text,width:size,height:size,correctLevel:QRCode.CorrectLevel.M}); return h.querySelector("canvas"); }
+function renderQR(pane){
+  const cabs=sortCabs(state.cabs);
+  if(!cabs.length){ pane.innerHTML=`<div class="empty">수납장을 먼저 만들면 여기에서 QR 라벨이 생겨요.</div>`; return; }
+  pane.innerHTML = `<p class="note" style="margin-top:0">B21 라벨 크기를 고르고 각 라벨의 ‘B21용 저장’을 누르면 PNG가 저장돼요. NIIMBOT 앱에서 이미지로 불러와 인쇄하세요. 휴대폰 기본 카메라로 찍어도, 아래 ‘QR 스캔’으로 찍어도 그 칸이 열려요.</p>
+    <div class="row" style="margin-bottom:12px">
+      <label class="f" style="flex-direction:row;align-items:center;gap:8px">라벨 크기<select id="lblSize" style="width:auto">${Object.keys(SIZES).map(k=>`<option value="${k}" ${k===lblSize?"selected":""}>${k.replace("x"," × ")} mm</option>`).join("")}</select></label>
+      <button id="saveSheet">A4 전체 저장</button>
+    </div>
+    <div class="labels" id="labels"></div>`;
+  const box=$("#labels");
+  for(const c of cabs){
+    const d=document.createElement("div"); d.className="label";
+    d.appendChild(qrCanvas(cabLink(c),220));
+    d.insertAdjacentHTML("beforeend",`<b>${esc(c.code)} · ${esc(c.name)}</b><button data-lbl="${esc(c.id)}">B21용 저장</button>`);
+    box.appendChild(d);
+  }
+}
+function fitFont(g,text,maxW,size,weight){ do{ g.font=`${weight} ${size}px 'IBM Plex Sans KR', sans-serif`; if(g.measureText(text).width<=maxW) break; size-=2; }while(size>12); }
+function downloadCanvas(cv,filename){ cv.toBlob(b=>{ const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=filename; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},1000); },"image/png"); }
+function saveB21(id){
+  const c=cabById(id); if(!c) return;
+  const [wmm,hmm]=SIZES[lblSize], k=12, W=wmm*k, H=hmm*k, m=2*k;
+  const cv=document.createElement("canvas"); cv.width=W; cv.height=H; const g=cv.getContext("2d");
+  g.fillStyle="#fff"; g.fillRect(0,0,W,H); g.fillStyle="#000"; g.textBaseline="middle";
+  const name=String(c.name);
+  if(wmm>hmm){
+    const q=H-2*m; g.drawImage(qrCanvas(cabLink(c),q),m,m,q,q);
+    const x0=m+q+m, tw=W-x0-m/2; g.textAlign="left";
+    fitFont(g,c.code,tw,Math.round(H*0.3),"bold"); g.fillText(c.code,x0,H*0.32);
+    fitFont(g,name,tw,Math.round(H*0.15),"500"); g.fillText(name,x0,H*0.66);
+  } else {
+    const q=Math.round(Math.min(W-2*m,H*0.66)); g.drawImage(qrCanvas(cabLink(c),q),(W-q)/2,m,q,q);
+    g.textAlign="center"; const label=`${c.code}  ${name}`;
+    fitFont(g,label,W-2*m,Math.round(H*0.11),"bold"); g.fillText(label,W/2,m+q+(H-m-q)/2);
+  }
+  downloadCanvas(cv,`B21_${c.code}_${wmm}x${hmm}mm.png`);
+}
+function saveSheet(){
+  const cabs=sortCabs(state.cabs); if(!cabs.length) return;
+  const W=1240,H=1754,cols=3,cellW=360,cellH=400,mx=(W-cols*cellW)/2,my=60,per=12;
+  for(let p=0;p<Math.ceil(cabs.length/per);p++){
+    const cv=document.createElement("canvas"); cv.width=W; cv.height=H; const g=cv.getContext("2d");
+    g.fillStyle="#fff"; g.fillRect(0,0,W,H);
+    cabs.slice(p*per,(p+1)*per).forEach((c,i)=>{
+      const x=mx+(i%cols)*cellW, y=my+Math.floor(i/cols)*cellH;
+      g.strokeStyle="#bbb"; g.setLineDash([8,6]); g.strokeRect(x+10,y+10,cellW-20,cellH-20); g.setLineDash([]);
+      g.drawImage(qrCanvas(cabLink(c),260),x+50,y+30,260,260);
+      g.fillStyle="#111"; g.textAlign="center"; g.font="bold 34px 'IBM Plex Sans KR', sans-serif"; g.fillText(c.code,x+cellW/2,y+330);
+      g.font="26px 'IBM Plex Sans KR', sans-serif"; g.fillText(String(c.name).slice(0,14),x+cellW/2,y+368);
+    });
+    downloadCanvas(cv,`약품장_QR라벨_${p+1}.png`);
+  }
+}
+
+// ---------- Live QR scan ----------
+let scanner=null;
+async function startScan(){
+  if(typeof Html5Qrcode==="undefined"){ toast("스캔 도구를 불러오지 못했어요. 새로고침해 주세요."); return; }
+  $("#scanView").hidden=false;
+  scanner = new Html5Qrcode("reader", { formatsToSupport:[Html5QrcodeSupportedFormats.QR_CODE], useBarCodeDetectorIfSupported:true, verbose:false });
+  try{
+    await scanner.start({ facingMode:"environment" }, { fps:12, qrbox:(w,h)=>{ const s=Math.floor(Math.min(w,h)*0.7); return {width:s,height:s}; } }, onScan, ()=>{});
+  }catch(e){ stopScan(); toast("카메라를 켜지 못했어요. 브라우저에서 카메라 권한을 허용해 주세요.",4000); }
+}
+async function stopScan(){ $("#scanView").hidden=true; if(scanner){ try{ await scanner.stop(); }catch{} try{ scanner.clear(); }catch{} scanner=null; } }
+function onScan(text){
+  const id=(String(text).match(/#cab-([A-Za-z0-9_-]+)/)||[])[1];
+  if(!id){ toast("약품장 라벨이 아닌 QR이에요"); return; }
+  if(navigator.vibrate) navigator.vibrate(60);
+  stopScan(); openCab(id);
+}
+$("#scanBtn").onclick=startScan; $("#scanClose").onclick=stopScan;
+
+function openCab(id){ state.openCab=id; history.replaceState(null,"",`#cab-${id}`); window.scrollTo(0,0); render(); }
+function closeCab(){ state.openCab=null; history.replaceState(null,"",location.pathname); render(); }
+
+// ---------- Dialogs ----------
+const medDlg=$("#medDlg"), cabDlg=$("#cabDlg");
+function openMedDlg(m){
+  if(!state.cabs.length){ toast("수납장을 먼저 만들어 주세요"); return; }
+  state.editMed=m||null;
+  $("#medTitle").textContent = m?"약 정보 수정":"약 추가";
+  $("#mCab").innerHTML = sortCabs(state.cabs).map(c=>`<option value="${esc(c.id)}">${esc(c.code)} ${esc(c.name)}</option>`).join("");
+  $("#mName").value=m?.name||""; $("#mExp").value=m?.expiry||""; $("#mQty").value=m?.qty||""; $("#mUnit").value=m?.unit||""; $("#mNote").value=m?.note||"";
+  $("#mCab").value = m?.cabinetId || state.openCab || sortCabs(state.cabs)[0].id;
+  const del=$("#mDel"); del.hidden=!m; del.classList.remove("armed"); del.textContent="삭제";
+  medDlg.showModal();
+}
+$("#mCancel").onclick=()=>medDlg.close();
+$("#medForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const data={ id: state.editMed?.id || uid(), name:$("#mName").value.trim(), expiry:$("#mExp").value, cabinetId:$("#mCab").value, qty:$("#mQty").value.trim(), unit:$("#mUnit").value.trim(), note:$("#mNote").value.trim() };
+  if(!data.name||!data.expiry) return;
+  medDlg.close();
+  await write("upsertMed",{data});
+});
+$("#mDel").onclick=async ()=>{
+  const b=$("#mDel"); if(!b.classList.contains("armed")){ b.classList.add("armed"); b.textContent="한 번 더 누르면 삭제"; return; }
+  medDlg.close(); await write("deleteMed",{id:state.editMed.id},"삭제했어요");
+};
+function openCabDlg(c){
+  state.editCab=c||null;
+  $("#cabTitle").textContent=c?"수납장 수정":"수납장 추가";
+  $("#cCode").value=c?.code||""; $("#cName").value=c?.name||""; $("#cPlace").value=c?.place||"";
+  const del=$("#cDel"); del.hidden=!c; del.classList.remove("armed"); del.textContent="삭제";
+  cabDlg.showModal();
+}
+$("#cCancel").onclick=()=>cabDlg.close();
+$("#cabForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const data={ id: state.editCab?.id || uid(), code:$("#cCode").value.trim(), name:$("#cName").value.trim(), place:$("#cPlace").value.trim() };
+  if(!data.code||!data.name) return;
+  cabDlg.close(); await write("upsertCab",{data});
+});
+$("#cDel").onclick=async ()=>{
+  const b=$("#cDel"), c=state.editCab, n=state.meds.filter(m=>m.cabinetId===c.id).length;
+  if(!b.classList.contains("armed")){ b.classList.add("armed"); b.textContent= n?`약 ${n}종도 함께 삭제 — 한 번 더`:"한 번 더 누르면 삭제"; return; }
+  cabDlg.close(); state.openCab=null; await write("deleteCab",{id:c.id},"삭제했어요");
+};
+
+// ---------- Events ----------
+document.addEventListener("click", e=>{
+  const t=e.target.closest("button"); if(!t) return;
+  if(t.dataset.tab){ state.tab=t.dataset.tab; render(); }
+  else if(t.dataset.goto){ state.openCab=null; state.tab=t.dataset.goto; render(); }
+  else if(t.dataset.cab) openCab(t.dataset.cab);
+  else if(t.dataset.med) openMedDlg(state.meds.find(m=>m.id===t.dataset.med));
+  else if(t.dataset.lbl) saveB21(t.dataset.lbl);
+  else if(t.id==="back") closeCab();
+  else if(t.id==="addCab") openCabDlg();
+  else if(t.id==="editCab") openCabDlg(cabById(state.openCab));
+  else if(t.id==="addMed") openMedDlg();
+  else if(t.id==="saveSheet") saveSheet();
+});
+document.addEventListener("change", e=>{ if(e.target.id==="lblSize"){ lblSize=e.target.value; LS.set("medcab.lbl",lblSize); } });
+function readHash(){ const m=location.hash.match(/^#cab-([A-Za-z0-9_-]+)$/); state.openCab = m ? m[1] : null; }
+window.addEventListener("hashchange",()=>{ readHash(); render(); });
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible" && cfg.url) reload(true); });
+
+readHash();
+if(!cfg.url) showSetup(true);
+render();
+reload(state.loaded);
+</script>
+</body>
+</html>
